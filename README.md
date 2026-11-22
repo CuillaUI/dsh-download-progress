@@ -67,7 +67,7 @@ DSH 插件以 bundle 形式安装，两种方式任选：
 **从 GitHub 装**（不需要 clone）：
 
 ```bash
-dsh plugin --profile web add github:Sama05/dsh-download-progress
+dsh plugin --profile web add github:CuillaUI/dsh-download-progress
 ```
 
 > 把 `web` 换成你的 profile 名；desktop profile 因 CLI 限制需走下面的 link: 方式。

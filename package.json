@@ -1,14 +1,14 @@
 {
   "name": "@local/dsh-download-progress",
-  "version": "0.5.1",
-  "comment:version": "0.5.1：SHELL_TOOLS 白名单补上 ops_bash（dsh-ops 的 bash 工具名），修复宿主升级后下载进度条不出现的问题",
+  "version": "0.5.2",
+  "comment:version": "0.5.2：安装说明与仓库地址改为本人维护库 CuillaUI/dsh-download-progress（README 安装命令 + package.json repository），保留原作者 Sama05 署名",
   "private": true,
   "description": "Frosted-glass download progress overlay for DeepSeek Harness (DSH)",
   "license": "MIT",
   "author": "Sama05",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sama05/dsh-download-progress.git"
+    "url": "https://github.com/CuillaUI/dsh-download-progress.git"
   },
   "keywords": [
     "dsh",
