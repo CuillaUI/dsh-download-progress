@@ -1,0 +1,71 @@
+{
+  "name": "@local/dsh-download-progress",
+  "version": "0.5.1",
+  "comment:version": "0.5.1：SHELL_TOOLS 白名单补上 ops_bash（dsh-ops 的 bash 工具名），修复宿主升级后下载进度条不出现的问题",
+  "private": true,
+  "description": "Frosted-glass download progress overlay for DeepSeek Harness (DSH)",
+  "license": "MIT",
+  "author": "Sama05",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sama05/dsh-download-progress.git"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "progress"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=18",
+    "dsh": ">=0.2.0-rc.1"
+  },
+  "comment:node": ">=18 是硬底线（插件本身只用了 18 就有的 API）。深度进度（stream）额外需要 Node >= 22.15 的 Module.registerHooks，缺失时自动降级为只按文件大小估算，不报错、不崩溃。见 README「降级」一节。",
+  "scripts": {
+    "build": "node scripts/build-client.mjs",
+    "build:check": "node scripts/build-client.mjs --check",
+    "prepublishOnly": "node scripts/build-client.mjs --check",
+    "test": "node scripts/build-client.mjs --check && node architecture.mjs && node contract.mjs && node test/features.test.mjs && node test/stream-sensor.test.mjs && node script.test.mjs && node smoke-boot.mjs && node smoke.mjs && node smoke-host.mjs && node stress-host.mjs && node stress-round2.mjs && node stress-client.mjs",
+    "contract": "node contract.mjs",
+    "bench": "node bench.mjs"
+  },
+  "files": [
+    "index.js",
+    "utils.js",
+    "detect.js",
+    "plan.js",
+    "plan/",
+    "detect/",
+    "sensor/",
+    "state.js",
+    "state/",
+    "script.js",
+    "script/",
+    "background.js",
+    "background/",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "CONTRACT.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  }
+}
