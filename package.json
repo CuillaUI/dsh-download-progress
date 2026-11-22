@@ -1,7 +1,7 @@
 {
   "name": "@local/dsh-download-progress",
-  "version": "0.5.3",
-  "comment:version": "0.5.3：README 顶部增加维护说明——注明原库 Sama05/dsh-download-progress 地址、截至 2026-11-23 已 26 天未更新，本库 CuillaUI 接手后续维护",
+  "version": "0.5.4",
+  "comment:version": "0.5.4：README 支持版本表更新——完整验证版本从 0.2.1-rc.2 改为当前宿主 0.2.2-rc.5（已核实 runtime.json desktopVersion），engines.dsh 下限 >=0.2.0-rc.1 不变",
   "private": true,
   "description": "Frosted-glass download progress overlay for DeepSeek Harness (DSH)",
   "license": "MIT",

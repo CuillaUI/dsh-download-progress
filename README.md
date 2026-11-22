@@ -52,7 +52,7 @@ agent 常在后台默默执行 `curl -L -o xxx.zip`、`pnpm add`、网页抓取�
 
 | 项 | 要求 | 说明 |
 | --- | --- | --- |
-| **DSH** | `>= 0.2.0-rc.1` | 已写入 `package.json` 的 `engines.dsh`。**完整验证于 `0.2.1-rc.2`** |
+| **DSH** | `>= 0.2.0-rc.1` | 已写入 `package.json` 的 `engines.dsh`。**完整验证于 `0.2.2-rc.5`** |
 | Node.js | `>= 18` | 插件跑在 DSH 内置的 Electron 里 |
 | Chromium | `>= 111` | 毛玻璃与 `color-mix` 需要，DSH 0.2.x 自带 |
 | 操作系统 | Windows / macOS / Linux | **只在 Windows 实测过**；其余平台理论可用但未验证 |
