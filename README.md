@@ -107,8 +107,9 @@ plugin_manager action=remove_bundle target="@local/dsh-download-progress"
 | --- | --- |
 | `curl -o <文件>` / `--output` / `--output-document` | 最常见；`--output=X` 等号写法同样识别 |
 | `curl -O` / `--remote-name` | 目标文件由 URL 推断 |
-| `wget -O <文件>` | 支持 `--output-document=X` |
-| `Invoke-WebRequest -OutFile <文件>` | 必须带 `-OutFile`；`-OutFile:D:\x` 冒号写法也认 |
+| `wget -O <文件>` | 支持 `--output-document=X`；注意 wget 的 `-T` 是超时不是上传，不会被误判 |
+| `aria2c -o <文件> [-d <目录>]` | `-o` 相对 `-d` 目录解析；预分配文件读 `.aria2` 伴生位图拿真实进度；`-i list.txt` 批量清单解析出全部目标 |
+| `Invoke-WebRequest -OutFile <文件>`（别名 `iwr`） | 必须带 `-OutFile`；`-OutFile:D:\x` 冒号写法也认 |
 | `git clone <url> <目录>` | 采样目录总体积（目标是目录，`stat` 恒为 0，单独走目录树累加） |
 | `powershell -File <脚本>` / `pwsh -File <脚本>` | 读脚本里的 `-OutFile` / `-Destination` / `-o` |
 | `certutil -urlcache -split -f <url> <文件>` | 目标按普通文件采样 |
@@ -120,9 +121,17 @@ plugin_manager action=remove_bundle target="@local/dsh-download-progress"
 脚本用子进程下载（`& curl.exe -o $Out $Url`）同样能跟——采样的是**文件大小**，
 跟谁把字节写进去无关。
 
+**aria2c 的三件特殊事**：① 它一开始就把目标文件**预分配**到最终大小，`stat` 读到的永远是满体积——插件改读 `<文件>.aria2` 伴生文件里的位图，算出真实已完成字节；② `-o` 是相对 `-d` 目录的，`-d D:\Downloads -o win.iso` 盯的是 `D:\Downloads\win.iso`，不是 cwd；③ `-i list.txt` 批量下载时命令行里没有任何目标，插件打开清单文件（按 aria2c 格式解析 URI 行与缩进的 `out=` / `dir=` 选项，条目自己的 `dir=` 优先于命令行 `-d`），把每个真实目标都纳入跟踪，并跟随同一条命令里的 `cd` 解析相对路径。清单超过 4 MB 或 5000 条、读不了、或没有 http(s) 条目时，退回单目标解析而不是卡死。URL 里的 `%20` 这类转义按 aria2c 的规则解码成落盘文件名（curl `-O` 不解码，两者分开处理）。
+
+**命令形态的兼容**：`Start-Process -FilePath aria2c.exe -ArgumentList '-x','16','-o','w.iso',url` 会被解包成真正执行的命令再识别（`-ArgumentList` / `-Args` 的逗号数组逐个拆开；`-FilePath` 是变量时不猜）；全路径与引号包裹的程序名同样认得——`& 'D:\tools\aria2\aria2c.exe' …`、`C:\Windows\System32\curl.exe …` 按 basename 识别，下载器不在 PATH 上也能出卡。
+
+**不误报**：所有下载器判定都锚在「命令段头部」——`Get-Process curl`、注释里的 `# curl …`、`Write-Host "use curl -o f u"` 都不会立卡；字符串字面量与 here-string 内容先被剔除。上传按段排除：`curl -T` / `--upload-file` 是上传不出卡，但同一条命令里既上传又下载时，下载那张卡照常出。内联超长命令只扫描前 20000 字符（模式都锚在头部，尾部纯浪费宿主主线程）。
+
+**卡片标题**优先用 URL 里的文件名回答「在下什么」，而不是磁盘上随便哪个临时文件——分段/并行下载写 `part1.bin…part8.bin` 时，标题仍是用户要的那个文件；URL 没有可用文件名（裸域名、目录、`/download?id=5`）才回落到输出路径。
+
 **只有「进行中」（无字节数，宿主不提供中间事件）**
 
-插件安装（`pnpm` / `npm` / `yarn`）、网页抓取、`research` / `web_search` 类搜索工具、其他包管理器命令（`pip` / `uv` / `docker pull` / `ollama pull`）、`Start-BitsTransfer`。
+插件安装（`plugin_manager` 的 install 动作，卡片下方滚动 pnpm 最新日志）、网页抓取（`web_fetch`）、搜索工具（`web_search` / `advanced_search` / `multi_search` / `research` / `platform_search` / `video_search` / `domain_search` / `free_search_test`，一次调用多条查询时用 `·` 连进标题）、其他包管理器命令（`pnpm add/i/install`、`npm i/install/add`、`yarn add`、`pip install`、`uv add/pip`、`docker pull`、`ollama pull`）、`Start-BitsTransfer`。
 
 > **「启用深度进度」开关**（设置页，默认关，**改完需重启应用生效**）：打开后，网页抓取与搜索这类**不落盘**的 HTTP 请求也能拿到字节数与百分比。
 >
@@ -205,7 +214,7 @@ plugin_manager action=remove_bundle target="@local/dsh-download-progress"
 | 出现动画 | 上浮淡入 | 上浮淡入 / CRT 开关机 / 水波纹 / 横向滑入 / 下落弹入 / 弹性放大 / 横扫揭示 / 翻折展开 / 旋转入位 / 模糊聚焦 / 无动画 |
 | 浮层位置 | 顶部居中 | 直接拖动浮层定位，「重置位置」恢复 |
 
-配置保存在浏览器 `localStorage`，不写 Host 配置文件，所以升级重装不会丢。
+配置保存在浏览器 `localStorage`，不写 Host 配置文件，所以升级重装不会丢。设置页的标题与简介提供中英两份元数据（`locale/zh.json` / `locale/en.json`），浮层与简易条的界面文案为中文。
 
 ### 自定义主题（`--ddp-*`）
 
@@ -224,13 +233,25 @@ localStorage['dsh-download-progress:themes'] = JSON.stringify([
 
 ## 开发与测试
 
-改完跑 `npm test` 即可（八步全离线，不需要浏览器或 DSH 进程）：`scripts/build-client.mjs --check` → `contract.mjs` → `script.test.mjs` → `smoke.mjs` → `smoke-host.mjs` → `stress-host.mjs` → `stress-round2.mjs` → `stress-client.mjs`。`contract.mjs` 会拦住「视图直接读 wire 字段」和「文档与实现不一致」两类退化——Host 与 UI 之间的字段契约见 [CONTRACT.md](CONTRACT.md)，其余实现细节见 [NOTES-FOR-AI.md](NOTES-FOR-AI.md)。
+**本库是发布形态**：`client.js` 已是拼好的构建产物，安装与使用都不需要构建、不需要 `npm install`。源码（`src/client/**`）、测试链（`scripts/build-client.mjs`、`architecture.mjs`、`contract.mjs`、`test/`、`smoke*.mjs`、`stress*.mjs`）、实验脚手架（`lab/`）与性能基准（`bench.mjs`）都在原库 [Sama05/dsh-download-progress](https://github.com/Sama05/dsh-download-progress)，本库未包含。`package.json` 里保留的 `scripts` 字段是上游遗留元数据，在本库跑不了（缺对应文件）；要跑完整测试链请去原库。
 
-手工实验的脚手架（限速服务器、命令分类矩阵、真机观察器）在 `lab/`，见 [lab/README.md](lab/README.md)；它不随插件发布。
+Host 与 UI 之间的字段契约见 [CONTRACT.md](CONTRACT.md)（本库包含）；实现细节笔记 NOTES-FOR-AI.md 见原库。
 
-性能基准：`npm run bench`（中位数 + p95，`--json` 出机器可读结果，`--save` 更新 `bench/baseline.json`；`--after` 存到 `bench/after.json` 便于前后对比）。
+**本地改代码的正确姿势**：以 `link:` 方式装进 profile 时，改宿主侧文件（`index.js`、`detect/`、`state/`、`sensor/` 等）后重启 DSH 生效；改 `client.js` 后刷新页面生效（必要时重启）。改完把 `state/registry.js` 的 `BUILD_TAG` 与 `package.json` 的 `version` 同步——快照接口靠它分辨宿主加载的是新代码还是旧缓存。
 
-**改了 UI 之后要重新拼一次**：`client.js` 是 `src/client/**` 的构建产物（宿主只下发一个 bundle，源码里不能写 `import`），改完跑 `npm run build`；`npm test` 的第一步 `build-client --check` 会在产物过期时直接失败并指出第一处差异。
+---
+
+## 本地修改记录（相对原库）
+
+本库基于原库 `main`（最后提交 2026-10-28）。经 SHA256 逐文件比对，**除下列改动外，其余全部文件与原库逐字节一致**；原库的源码与测试脚手架未随发布包进入本库（见「开发与测试」）。
+
+| 版本 | 日期 | 类型 | 改动 |
+| --- | --- | --- | --- |
+| 0.5.1 | 2026-11-23 | 代码修复 | `detect/tools.js`：`SHELL_TOOLS` 白名单补上 `ops_bash`。宿主升级到 0.2.2-rc.5 后，shell 命令走 dsh-ops 插件的 `ops_bash` 工具，旧白名单（`pwsh` / `bash` / `shell` / `terminal_send`）不认它，命令行下载永远不出进度卡片。`state/registry.js`：`BUILD_TAG` 0.4.0 → 0.5.1 |
+| 0.5.2 | 2026-11-23 | 文档 | 安装命令与 `package.json` 的 `repository` 改指本库 `CuillaUI/dsh-download-progress`，保留原作者署名 |
+| 0.5.3 | 2026-11-23 | 文档 | README 顶部增加维护说明：原库地址、26 天未更新、本库接手维护 |
+| 0.5.4 | 2026-11-23 | 文档 | 「支持的版本」完整验证版本 0.2.1-rc.2 → 0.2.2-rc.5（已核实宿主 `runtime.json` 的 `desktopVersion`） |
+| 0.5.5 | 2026-11-23 | 文档 + 代码 | 全量功能审计：补写 aria2c（预分配 / `.aria2` 位图 / `-i` 清单）、Start-Process 解包、全路径程序识别、命令段防误报、搜索工具全名单、卡片标题规则等实测功能；「开发与测试」改写为发布形态说明，删除本库不存在的文件引用；`BUILD_TAG` 同步至 0.5.5 |
 
 ---
 

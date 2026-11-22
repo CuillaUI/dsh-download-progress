@@ -83,7 +83,7 @@ export function forEachTask(kind, mutate) {
  * fresh one at a glance: when the card misbehaves, this is the first thing to
  * read. Keep it in step with `version` in package.json.
  */
-export const BUILD_TAG = '0.5.1' // 构建标签：与 package.json 版本保持一致，快照接口靠它分辨宿主加载的是新代码还是旧缓存
+export const BUILD_TAG = '0.5.5' // 构建标签：与 package.json 版本保持一致，快照接口靠它分辨宿主加载的是新代码还是旧缓存
 
 /**
  * The live card already watching a given path in the same session, if any.

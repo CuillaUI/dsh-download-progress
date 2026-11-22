@@ -1,7 +1,7 @@
 {
   "name": "@local/dsh-download-progress",
-  "version": "0.5.4",
-  "comment:version": "0.5.4：README 支持版本表更新——完整验证版本从 0.2.1-rc.2 改为当前宿主 0.2.2-rc.5（已核实 runtime.json desktopVersion），engines.dsh 下限 >=0.2.0-rc.1 不变",
+  "version": "0.5.5",
+  "comment:version": "0.5.5：全量功能审计——README 补写 aria2c/Start-Process 解包/全路径识别/防误报/搜索工具全名单等实测功能，新增本地修改记录表，开发与测试一节改写为发布形态说明；state/registry.js 的 BUILD_TAG 同步至 0.5.5",
   "private": true,
   "description": "Frosted-glass download progress overlay for DeepSeek Harness (DSH)",
   "license": "MIT",
