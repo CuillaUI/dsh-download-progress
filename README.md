@@ -5,6 +5,8 @@
 
 在 DeepSeek Harness（DSH）里跑任务时，agent 一开始下载或加载东西，窗口上方自动浮出一条进度条，带**已下载 / 总大小**、**实时速度**、**百分比**，空闲时每秒刷新、有任务在跑时 0.4 秒刷新一次。
 
+> **维护说明**：原库为 [Sama05/dsh-download-progress](https://github.com/Sama05/dsh-download-progress)，最后一次更新停在 **2026-10-28**，截至 2026-11-23 已 **26 天**没有更新。本库（[CuillaUI/dsh-download-progress](https://github.com/CuillaUI/dsh-download-progress)）已接手维护，后续修复与更新都在这里发布——已包含宿主升级后进度条不出现的修复（SHELL_TOOLS 白名单补上 `ops_bash`），安装命令也已指向本库。感谢原作者 Sama05 的原始实现（MIT 许可，署名保留）。
+
 ---
 
 ## 它解决什么问题
